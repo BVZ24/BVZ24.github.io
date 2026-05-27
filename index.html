@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personal Portfolio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ============================================
+       COLOR SCHEME - Change these to retheme
+       ============================================ */
+    :root {
+      --bg: #0a0a0b;
+      --bg-elevated: #121214;
+      --fg: #e8e6e3;
+      --fg-muted: #6b6966;
+      --accent: #c41e3a;
+      --accent-glow: rgba(196, 30, 58, 0.4);
+      --border: #1f1f23;
+      --card: #151517;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--fg);
+      overflow-x: hidden;
+    }
+
+    .font-display {
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    /* Subtle noise texture overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      opacity: 0.03;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    /* Gradient orbs for atmosphere */
+    .gradient-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(100px);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .orb-1 {
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+      top: -200px;
+      right: -200px;
+      opacity: 0.5;
+    }
+
+    .orb-2 {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(60, 20, 80, 0.3) 0%, transparent 70%);
+      bottom: 20%;
+      left: -100px;
+      opacity: 0.4;
+    }
+
+    /* Links & interactive elements */
+    .link-hover {
+      position: relative;
+      display: inline-block;
+    }
+
+    .link-hover::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--accent);
+      transition: width 0.3s ease;
+    }
+
+    .link-hover:hover::after {
+      width: 100%;
+    }
+
+    /* Project cards */
+    .project-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .project-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 60px var(--accent-glow);
+    }
+
+    /* Scroll reveal animations */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Stagger children */
+    .reveal-stagger > * {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .reveal-stagger.visible > *:nth-child(1) { transition-delay: 0.1s; }
+    .reveal-stagger.visible > *:nth-child(2) { transition-delay: 0.2s; }
+    .reveal-stagger.visible > *:nth-child(3) { transition-delay: 0.3s; }
+    .reveal-stagger.visible > *:nth-child(4) { transition-delay: 0.4s; }
+    .reveal-stagger.visible > *:nth-child(5) { transition-delay: 0.5s; }
+
+    .reveal-stagger.visible > * {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Custom cursor glow */
+    .cursor-glow {
+      position: fixed;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      z-index: 0;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    /* Focus states */
+    a:focus-visible, button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 4px;
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      
+      .reveal, .reveal-stagger > * {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    /* Divider line */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+    }
+
+    /* Social icons */
+    .social-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      color: var(--fg-muted);
+      transition: all 0.3s ease;
+    }
+
+    .social-icon:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    /* Section indicator */
+    .section-number {
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      color: var(--fg-muted);
+    }
+
+    /* Skill tags */
+    .skill-tag {
+      padding: 0.5rem 1rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      font-size: 0.875rem;
+      color: var(--fg-muted);
+      transition: all 0.2s ease;
+    }
+
+    .skill-tag:hover {
+      border-color: var(--accent);
+      color: var(--fg);
+    }
+  </style>
+</head>
+<body>
+  <!-- Atmospheric gradient orbs -->
+  <div class="gradient-orb orb-1"></div>
+  <div class="gradient-orb orb-2"></div>
+  
+  <!-- Cursor glow effect -->
+  <div class="cursor-glow" id="cursorGlow"></div>
+
+  <!-- Navigation -->
+  <nav class="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-[var(--bg)]/80 border-b border-[var(--border)]">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="index.html" class="font-display text-2xl font-semibold tracking-tight" id="navLogo">BV</a>
+      <div class="flex items-center gap-8">
+        <a href="#about" class="link-hover text-sm text-[var(--fg-muted)] hover:text-[var(--fg)] transition-colors">About</a>
+        <a href="#work" class="link-hover text-sm text-[var(--fg-muted)] hover:text-[var(--fg)] transition-colors">Work</a>
+        <a href="gallery.html" class="link-hover text-sm text-[var(--fg-muted)] hover:text-[var(--fg)] transition-colors">Gallery</a>
+        <a href="#contact" class="link-hover text-sm text-[var(--fg-muted)] hover:text-[var(--fg)] transition-colors">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="min-h-screen flex items-center justify-center px-6 pt-20">
+    <div class="max-w-4xl text-center reveal" id="heroSection">
+      <p class="section-number mb-6" id="heroGreeting">HELLO, I'M</p>
+      <h1 class="font-display text-6xl md:text-8xl lg:text-9xl font-light tracking-tight mb-6" id="heroName">
+        Byron Velez
+      </h1>
+      <p class="text-xl md:text-2xl text-[var(--fg-muted)] font-light max-w-2xl mx-auto mb-12" id="heroTagline">
+        Novice Developer crafting digital experiences with precision and purpose
+      </p>
+      <div class="flex items-center justify-center gap-6">
+        <a href="#work" class="px-8 py-3 bg-[var(--accent)] text-white text-sm font-medium tracking-wide hover:bg-[#a01830] transition-colors">
+          View Work
+        </a>
+        <a href="#contact" class="px-8 py-3 border border-[var(--border)] text-sm font-medium tracking-wide hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors">
+          Get in Touch
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="py-32 px-6">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid md:grid-cols-2 gap-16 items-start">
+        <div class="reveal">
+          <p class="section-number mb-4">01 / ABOUT</p>
+          <h2 class="font-display text-4xl md:text-5xl font-light mb-8" id="aboutTitle">
+            Building bridges with code<br><span class="text-[var(--accent)]">and in real life</span>
+          </h2>
+          <div class="space-y-6 text-[var(--fg-muted)] leading-relaxed" id="aboutContent">
+            <p>I'm a developer with a deep appreciation for technology. I believe the future is a policy choice.</p>
+            <p>Lover of cats, video games, films, comics and science.</p>
+            <p>I approach every project with the intention to learn something new and push for the future we want to live in.</p>
+          </div>
+        </div>
+        <div class="reveal" style="transition-delay: 0.2s;">
+          <p class="section-number mb-4">SKILLS & TOOLS</p>
+          <div class="flex flex-wrap gap-3 reveal-stagger" id="skillsList">
+            <span class="skill-tag">Java</span>
+            <span class="skill-tag">JavaScript</span>
+            <span class="skill-tag">SQL</span>
+            <span class="skill-tag">HTML/CSS</span>
+            <span class="skill-tag">C++</span>
+            <span class="skill-tag">C#</span>
+            <span class="skill-tag">Python</span>
+            <span class="skill-tag">Flutter</span>
+            <span class="skill-tag">Spring</span>
+            <span class="skill-tag">Git</span>
+            <span class="skill-tag">Eclipse</span>
+            <span class="skill-tag">IntelliJ</span>
+            <span class="skill-tag">Linux</span>
+            <span class="skill-tag">Windows</span>
+            <span class="skill-tag">Microsoft Office</span>
+            <span class="skill-tag">Trello</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider max-w-4xl mx-auto"></div>
+
+  <!-- Work Section -->
+  <section id="work" class="py-32 px-6">
+    <div class="max-w-6xl mx-auto">
+      <div class="mb-16 reveal">
+        <p class="section-number mb-4">02 / SELECTED WORK</p>
+        <h2 class="font-display text-4xl md:text-5xl font-light">
+          Projects <br><span class="text-[var(--accent)]"></span>
+        </h2>
+      </div>
+      
+      <div class="grid md:grid-cols-2 gap-8 reveal-stagger" id="projectsList">
+        <a href="#" class="project-card block p-8 group">
+          <h3 class="font-display text-2xl font-semibold mb-3 group-hover:text-[var(--accent)] transition-colors">
+            Coming Soon
+          </h3>
+          <p class="text-[var(--fg-muted)] mb-6">New projects are currently under development.</p>
+          <div class="flex flex-wrap gap-2">
+            <span class="text-xs text-[var(--fg-muted)] px-2 py-1 bg-[var(--bg)] border border-[var(--border)]">Upcoming</span>
+          </div>
+        </a>
+        <a href="#" class="project-card block p-8 group">
+          <h3 class="font-display text-2xl font-semibold mb-3 group-hover:text-[var(--accent)] transition-colors">
+            Coming Soon
+          </h3>
+          <p class="text-[var(--fg-muted)] mb-6">New projects are currently under development.</p>
+          <div class="flex flex-wrap gap-2">
+            <span class="text-xs text-[var(--fg-muted)] px-2 py-1 bg-[var(--bg)] border border-[var(--border)]">Upcoming</span>
+          </div>
+        </a>
+        <a href="#" class="project-card block p-8 group">
+          <h3 class="font-display text-2xl font-semibold mb-3 group-hover:text-[var(--accent)] transition-colors">
+            Coming Soon
+          </h3>
+          <p class="text-[var(--fg-muted)] mb-6">New projects are currently under development.</p>
+          <div class="flex flex-wrap gap-2">
+            <span class="text-xs text-[var(--fg-muted)] px-2 py-1 bg-[var(--bg)] border border-[var(--border)]">Upcoming</span>
+          </div>
+        </a>
+        <a href="#" class="project-card block p-8 group">
+          <h3 class="font-display text-2xl font-semibold mb-3 group-hover:text-[var(--accent)] transition-colors">
+            Coming Soon
+          </h3>
+          <p class="text-[var(--fg-muted)] mb-6">New projects are currently under development.</p>
+          <div class="flex flex-wrap gap-2">
+            <span class="text-xs text-[var(--fg-muted)] px-2 py-1 bg-[var(--bg)] border border-[var(--border)]">Upcoming</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider max-w-4xl mx-auto"></div>
+
+  <!-- Contact Section -->
+  <section id="contact" class="py-32 px-6">
+    <div class="max-w-4xl mx-auto text-center reveal">
+      <p class="section-number mb-4">03 / CONTACT</p>
+      <h2 class="font-display text-4xl md:text-6xl font-light mb-8">
+        Let's create something<br><span class="text-[var(--accent)]">together</span>
+      </h2>
+      <p class="text-[var(--fg-muted)] text-lg mb-12 max-w-xl mx-auto">
+        Currently available for full-time opportunities. 
+        If you have a vision, I'd love to help bring it to life.
+      </p>
+      
+      <a href="mailto:byron24velez@gmail.com" class="inline-block font-display text-3xl md:text-4xl link-hover mb-16">
+        byron24velez@gmail.com
+      </a>
+      
+      <div class="flex items-center justify-center gap-4">
+        <a href="https://github.com/BVZ24" target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="GitHub">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+        </a>
+        <a href="https://x.com/ByronVelez95565" target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="Twitter">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l11.733 16h4.267l-11.733 -16z" /><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" /></svg>
+        </a>
+        <a href="https://www.linkedin.com/in/byron-velez-0b6a4a282/" target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="LinkedIn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-8 px-6 border-t border-[var(--border)]">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <p class="text-sm text-[var(--fg-muted)]">
+        Passionate about the future of technology and science.
+      </p>
+      <p class="text-sm text-[var(--fg-muted)]">© 2026</p>
+    </div>
+  </footer>
+
+  <script>
+    /* ============================================
+       INTERACTIONS
+       ============================================ */
+    
+    // Cursor glow effect
+    const cursorGlow = document.getElementById('cursorGlow');
+    let mouseX = 0, mouseY = 0;
+    let glowX = 0, glowY = 0;
+
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      cursorGlow.style.opacity = '0.15';
+    });
+
+    document.addEventListener('mouseleave', () => {
+      cursorGlow.style.opacity = '0';
+    });
+
+    function animateGlow() {
+      glowX += (mouseX - glowX) * 0.1;
+      glowY += (mouseY - glowY) * 0.1;
+      cursorGlow.style.left = glowX + 'px';
+      cursorGlow.style.top = glowY + 'px';
+      requestAnimationFrame(animateGlow);
+    }
+    animateGlow();
+
+    // Scroll reveal with IntersectionObserver
+    const revealElements = document.querySelectorAll('.reveal, .reveal-stagger');
+    
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    });
+
+    revealElements.forEach(el => revealObserver.observe(el));
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>

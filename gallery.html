@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gallery - Byron Velez</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #0a0a0b;
+      --bg-elevated: #121214;
+      --fg: #e8e6e3;
+      --fg-muted: #6b6966;
+      --accent: #c41e3a;
+      --accent-glow: rgba(196, 30, 58, 0.4);
+      --border: #1f1f23;
+      --card: #151517;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--fg);
+      overflow-x: hidden;
+    }
+
+    .font-display {
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      opacity: 0.03;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    .gradient-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(100px);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .orb-1 {
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+      top: -200px;
+      right: -200px;
+      opacity: 0.5;
+    }
+
+    .orb-2 {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(60, 20, 80, 0.3) 0%, transparent 70%);
+      bottom: 20%;
+      left: -100px;
+      opacity: 0.4;
+    }
+
+    .link-hover {
+      position: relative;
+      display: inline-block;
+    }
+
+    .link-hover::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--accent);
+      transition: width 0.3s ease;
+    }
+
+    .link-hover:hover::after {
+      width: 100%;
+    }
+
+    .cursor-glow {
+      position: fixed;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      z-index: 0;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    a:focus-visible, button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 4px;
+    }
+
+    .section-number {
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      color: var(--fg-muted);
+    }
+
+    /* Gallery Image Styles */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .gallery-item {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+      aspect-ratio: 2/3;
+      background: var(--card);
+      cursor: pointer;
+    }
+
+    .gallery-item:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 60px var(--accent-glow);
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <!-- Atmospheric gradient orbs -->
+  <div class="gradient-orb orb-1"></div>
+  <div class="gradient-orb orb-2"></div>
+  
+  <!-- Cursor glow effect -->
+  <div class="cursor-glow" id="cursorGlow"></div>
+
+  <!-- Navigation -->
+  <nav class="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-[var(--bg)]/80 border-b border-[var(--border)]">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="index.html" class="font-display text-2xl font-semibold tracking-tight">BV</a>
+      <div class="flex items-center gap-8">
+        <a href="index.html#about" class="link-hover text-sm text-[var(--fg-muted)] hover:text-[var(--fg)] transition-colors">About</a>
+        <a href="index.html#work" class="link-hover text-sm text-[var(--fg-muted)] hover:text-[var(--fg)] transition-colors">Work</a>
+        <a href="gallery.html" class="link-hover text-sm text-[var(--accent)] transition-colors">Gallery</a>
+        <a href="index.html#contact" class="link-hover text-sm text-[var(--fg-muted)] hover:text-[var(--fg)] transition-colors">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Gallery Section -->
+  <section class="min-h-screen px-6 pt-32 pb-20">
+    <div class="max-w-6xl mx-auto">
+      <!-- Header -->
+      <div class="text-center mb-16">
+        <p class="section-number mb-6">COMIC COLLECTION</p>
+        <h1 class="font-display text-6xl md:text-8xl font-light tracking-tight mb-6">
+          <span class="text-[var(--accent)]">Gallery</span>
+        </h1>
+        <p class="text-xl text-[var(--fg-muted)] font-light max-w-2xl mx-auto">
+          My favorite comic book covers and panels
+        </p>
+      </div>
+
+      <!-- Image Gallery Grid -->
+      <div class="gallery-grid">
+        
+        <div class="gallery-item">
+          <img src="https://m.media-amazon.com/images/I/71TfU3GnfML._AC_UF1000,1000_QL80_.jpg?random=1" alt="Comic cover 1">
+        </div>
+
+        <div class="gallery-item">
+          <img src="https://cdn.marvel.com/u/prod/marvel/i/mg/e/f0/511307b2f1200/clean.jpg?random=2" alt="Comic cover 2">
+        </div>
+
+        <div class="gallery-item">
+          <img src="https://cdn.marvel.com/u/prod/marvel/i/mg/3/03/57571f145a620/clean.jpg?random=3" alt="Comic cover 3">
+        </div>
+
+        <div class="gallery-item">
+          <img src="https://cdn.marvel.com/u/prod/marvel/i/mg/9/60/58cbfd08511c7/clean.jpg?random=4" alt="Comic cover 4">
+        </div>
+
+        <div class="gallery-item">
+          <img src="https://cdn.marvel.com/u/prod/marvel/i/mg/c/b0/6467ace72cd9a/clean.jpg?random=5" alt="Comic cover 5">
+        </div>
+
+        <div class="gallery-item">
+          <img src="https://m.media-amazon.com/images/I/617kRwONjtL.jpg?random=6" alt="Comic cover 6">
+        </div>
+
+        <div class="gallery-item">
+          <img src="https://cdn2.penguin.com.au/covers/original/9781401266653.jpg?random=7" alt="Comic cover 7">
+        </div>
+
+        <div class="gallery-item">
+          <img src="https://static.dc.com/2023-06/BMBTWK%20%28%20Cover%29.jpg?w=640?random=8" alt="Comic cover 8">
+        </div>
+
+        <div class="gallery-item">
+          <img src="https://static.dc.com/dc/files/default_images/orion_omnibus_simonson_5b035d33b25717.36861677.jpg?w=640?random=9" alt="Comic cover 9">
+        </div>
+
+      </div>
+
+      <!-- Back to Portfolio -->
+      <div class="text-center mt-16">
+        <a href="index.html" class="inline-flex items-center gap-2 px-8 py-3 border border-[var(--border)] text-sm font-medium tracking-wide hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+          Back to Portfolio
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-8 px-6 border-t border-[var(--border)]">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <p class="text-sm text-[var(--fg-muted)]">
+        Passionate about the future of technology and science.
+      </p>
+      <p class="text-sm text-[var(--fg-muted)]">© 2026</p>
+    </div>
+  </footer>
+
+  <script>
+    // Cursor glow effect
+    const cursorGlow = document.getElementById('cursorGlow');
+    let mouseX = 0, mouseY = 0;
+    let glowX = 0, glowY = 0;
+
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      cursorGlow.style.opacity = '0.15';
+    });
+
+    document.addEventListener('mouseleave', () => {
+      cursorGlow.style.opacity = '0';
+    });
+
+    function animateGlow() {
+      glowX += (mouseX - glowX) * 0.1;
+      glowY += (mouseY - glowY) * 0.1;
+      cursorGlow.style.left = glowX + 'px';
+      cursorGlow.style.top = glowY + 'px';
+      requestAnimationFrame(animateGlow);
+    }
+    animateGlow();
+  </script>
+</body>
+</html>
